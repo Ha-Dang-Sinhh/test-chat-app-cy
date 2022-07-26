@@ -10,7 +10,7 @@
             <span class="absolute w-3 h-3 bg-green-600 rounded-full left-10 top-3">
               </span>
             <div class="w-full flex justify-end">
-              <button class="text-white bg-red-500 px-3 py-2 rounded" @click="logout()">Đăng xuất</button>
+              <button class="text-white bg-red-500 px-3 py-2 rounded" @click="logout($event)">Đăng xuất</button>
             </div>
           </div>
           <div class="relative w-full p-6 overflow-y-auto h-[40rem]">
@@ -75,7 +75,8 @@ export default {
     };
   },
   methods : {
-    logout() {
+    logout(e) {
+      e.stopPropagation();
       console.log(auth)
       signOut(auth).then(() => {
         sessionStorage.removeItem('user');
@@ -93,14 +94,17 @@ export default {
         return;
       }
 
-      const urls = []
-      const fileName = `images/${Date.now()}image.png`;
-      const myRef = ref(storage, fileName);//tao ref
-      await uploadBytes(myRef, this.files[0], fileName);
-      const pathRef = ref(storage, fileName);
-      const url = await getDownloadURL(pathRef);
-      console.log(url);
-      urls.push(url);
+      let urls = []
+      if(this.files.length > 0){
+        const fileName = `images/${Date.now()}image.png`;
+        const myRef = ref(storage, fileName);//tao ref
+        await uploadBytes(myRef, this.files[0], fileName);
+        const pathRef = ref(storage, fileName);
+        const url = await getDownloadURL(pathRef);
+        console.log(url);
+        urls.push(url);
+      }
+
       const collectionRef = collection(db, 'chats');
       await addDoc(collectionRef, {
         message: this.message,
